@@ -1,6 +1,9 @@
 ---
 name: coordination-manager
 description: Act as Coordination Manager for complex work spread across several agent sessions and surfaces (Claude Code, claude.ai, Cowork, other tools). Use when the user asks to coordinate, orchestrate or plan multi-session work, track parallel workstreams, gates, relays, session ownership or decisions, prepare a session for compaction or handoff, or invokes /coordination-manager.
+license: MIT
+metadata:
+  version: "1.1.1"
 ---
 
 # Coordination Manager
