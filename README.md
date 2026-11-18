@@ -2,7 +2,7 @@
 
 A Claude skill (Agent Skills format) that turns a Claude session into a **Coordination Manager**: a deterministic coordinator for complex work spread across many agent sessions and surfaces (Claude Code, claude.ai, Cowork, other agents).
 
-It doesn't do the work. It keeps an exact, durable picture of every session, phase, gate, relay, decision, conflict and risk in a ledger; designs a gated plan to completion; writes self-contained relays; reviews every returned output; and stops drift. **You make the decisions; it recommends.**
+It doesn't do the work. It keeps an exact, durable picture of every session, phase, gate, relay, decision, conflict and risk in a ledger; designs a gated plan to completion; writes self-contained relays; reviews every returned output; and stops drift. **You make the decisions; it recommends.** When a coordination outgrows its session or surface, it **hands off** cleanly to a new one (`coord.py handoff`, protocol §7E).
 
 ## Install
 
@@ -26,8 +26,8 @@ git subtree add --prefix=skills/coordination-manager https://github.com/cooperle
 ```
 SKILL.md                 entry point (what Claude loads)
 reference/protocol.md    the full operating protocol: rules, six gated phases, relay lifecycle, return review
-templates/               relay, checkpoint, continuation sequence, relays, operator guide, structure plan
-scripts/coord.py         ledger tool (Python 3.9+, stdlib only): init · add · set · board · next · lint · glossary
+templates/               relay, checkpoint, handoff, continuation sequence, relays, operator guide, structure plan
+scripts/coord.py         ledger tool (Python 3.9+, stdlib only): init · add · set · board · next · lint · glossary · handoff
 docs/HOWTO.md            step-by-step usage
 docs/FEATURES.md         every feature, its reason and its status
 ```

@@ -72,3 +72,12 @@ The protocol works the same. Differences: the CM can't read your local folders, 
 - When another session proposes overriding an approved decision, say "log a conflict". Don't forward it.
 - Keep `coord/` in git. `git log` then holds the full history of the coordination.
 - Turn this skill's protocol updates into versions (CHANGELOG) so old engagements stay readable.
+
+## 8. Handing off (porting) a coordination
+
+When a coordination has to move to another session or surface (e.g. from a claude.ai chat to Claude Code for durable files and compaction, or a fresh session when the context is near its limit):
+
+1. In the **sending** session, say: "Prepare a handoff to <target>." The CM freezes relays, brings the ledger up to date (or builds one), and runs `coord.py handoff --to "<target>"`. It then fills in the parts the ledger can't hold: reasoning, your preferences, pitfalls. In a chat without tools, it fills in `templates/handoff.md` instead.
+2. Take the packet (`coord/HANDOFF-<date>.md`) and the latest deliverables to the **receiving** session, open `/coordination-manager` there, and say: "Receive this handoff."
+3. The receiving CM reads everything, answers the resume fingerprint from the files, and sends you a **Handoff ACK**. Confirm it, and coordination continues where it stopped.
+4. From then on, the old session is read-only. One active coordinator per project.

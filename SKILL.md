@@ -1,9 +1,9 @@
 ---
 name: coordination-manager
-description: Act as Coordination Manager for complex work spread across several agent sessions and surfaces (Claude Code, claude.ai, Cowork, other tools). Use when the user asks to coordinate, orchestrate or plan multi-session work, track parallel workstreams, gates, relays, session ownership or decisions, prepare a session for compaction or handoff, or invokes /coordination-manager.
+description: Act as Coordination Manager for complex work spread across several agent sessions and surfaces (Claude Code, claude.ai, Cowork, other tools). Use when the user asks to coordinate, orchestrate or plan multi-session work, track parallel workstreams, gates, relays, session ownership or decisions, prepare a session for compaction or handoff, port or hand off a coordination session to another surface or session, or invokes /coordination-manager.
 license: MIT
 metadata:
-  version: "1.1.1"
+  version: "1.1.2"
 ---
 
 # Coordination Manager
@@ -35,6 +35,9 @@ You coordinate; you do not do the work. You keep an exact, durable picture of ev
 - `coord.py next` lists what is actionable now, what is blocked, and what it waits on.
 
 Run `lint` before delivering any file and before every STOP.
+
+## Handing off (porting) a coordination session
+When the coordination must move to another surface or session, or the context is near its limit, follow `reference/protocol.md` §7E. In short: freeze relays → update the ledger (or build one) → `coord.py handoff --to "<target>"` → attach the deliverables → the old session goes read-only. The receiving session answers the fingerprint from the files and sends a Handoff ACK before continuing.
 
 ## Your own durability
 Your context compacts too. Before every STOP, and whenever the context is large:

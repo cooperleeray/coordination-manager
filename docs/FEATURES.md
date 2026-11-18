@@ -32,6 +32,7 @@
 | 14 | **Saved returns** (`coord/returns/`) | Keeps the evidence each review was based on; useful for audits and for resuming after a crash | Core |
 | 15 | **Multi-project isolation** (one workspace per project) | Prevents cross-project contamination of codes and decisions | Core |
 | 16 | **Install paths** (personal skill via clone or symlink, git subtree mirror, claude.ai upload; plugin marketplace deferred) | You work across surfaces; the same skill should follow you | Core |
+| 22 | **Handoff / port session** (`coord.py handoff`, protocol §7E, `templates/handoff.md`) | Long coordinations outgrow one session or surface; moving them by hand loses decisions and relays in flight | Core (1.1.2) |
 | 17 | **Scheduled check-ins** (e.g. a daily "what's next" via scheduled tasks) | Useful for long engagements where sessions run unattended | Deferred: trigger, an engagement with unattended sessions; uses the surface's scheduling tools, no code change needed |
 | 18 | **Sync to GitHub Issues / Projects or Notion** | A visual board for teams | Deferred: trigger, a second human joins an engagement. The files stay the source of truth; a sync would be one-way export |
 | 19 | **Relay packet export** (relay text + attachment list as one file per send) | Fewer manual steps when a relay needs several attachments | Deferred: trigger, frequent multi-attachment relays; easy addition to `coord.py` |

@@ -1,4 +1,4 @@
-# Coordination Manager protocol (v1.0)
+# Coordination Manager protocol (v1.1)
 
 Loaded by `SKILL.md`. Read this in full before Phase 1 of a new engagement; re-read each phase's section when you enter it.
 **Ledger integration:** every state change in any phase is written to `coord/ledger.json` (via `scripts/coord.py` or a direct edit). §7A–§7D define the ledger-driven mechanics.
@@ -17,8 +17,8 @@ Loaded by `SKILL.md`. Read this in full before Phase 1 of a new engagement; re-r
 8. **Durable state lives in files, not context.** The CM's own state lives in `coord/ledger.json`, `coord/BOARD.md` and `coord/CHECKPOINT.md`. Each working session keeps its own plan and checkpoint files. The CM's plan documents are versioned deliverables. Memory is a pointer, never the truth.
 9. **Ask, don't guess.** When an answer would change the plan, ask, with a recommendation and its reason. Batch questions; keep them bounded and numbered.
 10. **No execution on the Operator's systems by implication.** The CM does not push, deploy, delete or change settings unless the Operator explicitly asks it to in this chat.
-12. **Read-only reach (Claude Code).** When running locally, the CM may read other sessions' folders, repos and `~/.claude/projects/*` transcripts **only at paths the Operator grants**, and never writes outside `coord/`. Direct reading replaces asking the Operator to paste, but the CM still states what it read.
 11. **Plain language.** Codes (phases, relays, decisions) are always listed in the codes glossary, and defined on first use in every deliverable.
+12. **Read-only reach (Claude Code).** When running locally, the CM may read other sessions' folders, repos and `~/.claude/projects/*` transcripts **only at paths the Operator grants**, and never writes outside `coord/`. Direct reading replaces asking the Operator to paste, but the CM still states what it read.
 
 ---
 
@@ -174,6 +174,28 @@ Whenever two sessions (or a session and an approved decision) disagree, add a `c
 - **Risk register:** `risks` entries (description, likelihood, impact, mitigation, owner). Review them at each gate.
 - **Multiple projects:** one `coord/` workspace per project, never shared. The Operator may keep an index of workspaces.
 
+## 7E. Handoff (port a coordination session)
+
+Use when the coordination must move: to another surface (e.g. claude.ai → Claude Code, for files and compaction), to a fresh session (context near its limit), or to another operator. The goal is that **the receiving session continues exactly where the sending one stopped**, with no re-deriving and no drift.
+
+**Sending session (the CM being replaced):**
+1. **Freeze:** send no new relays. For each relay in flight (`sent`), record what is awaited. Finish any review in progress or record it as pending.
+2. **Bring the ledger up to date:** every session, phase, gate, relay, decision (with rulings verbatim), conflict and risk, plus deliverables with their current versions. If the coordination ran **without a ledger** (e.g. in a chat), build one now: `coord.py init`, then `add` the entries. If tools aren't available, fill `templates/handoff.md` by hand instead.
+3. **Generate the packet:** `coord.py handoff --to "<receiving surface/session>"` writes `coord/HANDOFF-<date>.md`. It contains the board, the open items, the next actions, the checkpoint, the resume fingerprint and the receiving instructions. Add what the ledger can't hold: the reasoning behind open recommendations, the Operator's preferences, and the pitfalls learned.
+4. **Attach the deliverables** (the latest version of each) and list them in the packet.
+5. **Mark the old session read-only:** the ledger log records "handed off to <X>", and the sending session answers no further coordination requests.
+
+**Receiving session:**
+1. Load the skill, read `HANDOFF-*.md` and the ledger **in full**, then run `coord.py lint` and `coord.py next`.
+2. **Answer the resume fingerprint from the files**, and report every mismatch.
+3. **Handoff ACK to the Operator:** what you now hold (sessions, open relays, open decisions, deliverables), what you could not verify, and the next action. Use the Operator's preferences from the packet.
+4. Continue at the packet's next action. Do not restart Phase 1; the handoff *is* the intake (Gate 1 = the Operator confirms the handoff ACK).
+
+**Rules:**
+- One active CM per project. The handoff makes the old session read-only.
+- Nothing is lost silently. Anything that wasn't carried over is listed under "Not transferred".
+- Decisions stay verbatim. The packet never paraphrases an Operator ruling.
+
 ## 8. Templates
 
 ### 8.1 Relay template
@@ -220,3 +242,4 @@ Timestamp, phase/step, status · last commit or save point · clean or dirty sta
 
 ## 10. Change log
 - v1.0, 2026-11-17: initial skill version, from a real multi-session architecture project.
+- v1.1, 2026-11-18: §7E Handoff (port a coordination session); rule numbering fixed.

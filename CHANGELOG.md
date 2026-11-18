@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.2: 2026-11-18
+- **Handoff / port session:** `coord.py handoff [--to TARGET]` writes `HANDOFF-<date>.md` (receiving instructions, next actions, relays in flight, returns awaiting review, open decisions, conflicts, risks, checkpoint and fingerprint, deliverables, verbatim rulings, a section for what the ledger can't hold); protocol §7E (sending and receiving procedure; one active CM per project); `templates/handoff.md` for coordinations without a ledger; HOWTO §8.
+- `tests/smoke.sh`: `mktemp` uses an explicit template under `$TMPDIR` (it works in sandboxes); also exercises `handoff`.
+- `reference/protocol.md`: rule numbering fixed (10, 11, 12); heading v1.1.
+
 ## 1.1.1: 2026-11-18
 - `SKILL.md` frontmatter: `license: MIT` and `metadata.version` (Agent Skills fields), so tools can read the version.
 - `VERIFY.md` (an install check question + the scripted check) and `tests/smoke.sh` (offline smoke test of the ledger tool).

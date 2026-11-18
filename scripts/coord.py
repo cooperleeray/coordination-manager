@@ -15,6 +15,7 @@ Commands
   next                                    print what can move now / what is blocked
   lint                                    consistency checks (exit 1 on errors)
   glossary                                write deliverables/<PROJECT>-CODES-GLOSSARY.md
+  handoff [--to TARGET]                   write HANDOFF-<date>.md: a packet to port this coordination
 
 Kinds: session phase gate relay decision deliverable conflict risk term
 List values use ';' (e.g. expects="hash;fingerprint", depends="P1;P2").
@@ -247,12 +248,42 @@ def cmd_glossary(d, args):
     with open(out, "w") as f: f.write(s)
     print(f"wrote {out}")
 
+def cmd_handoff(d, args):
+    L = load(d); to = "<receiving session>"
+    if "--to" in args:
+        i = args.index("--to")
+        if i + 1 >= len(args): die("usage: handoff [--to TARGET]")
+        to = args[i + 1]
+    date = now()[:10]
+    cmd_board(d, [])
+    nxt = cmd_next(d, [], quiet=True)
+    inflight = [(k, v["target"], v["purpose"], ", ".join(v.get("expects", []))) for k, v in L["relays"].items() if v["status"] == "sent"]
+    review = [(k, v["target"], v["purpose"]) for k, v in L["relays"].items() if v["status"] == "returned"]
+    ck = os.path.join(d, "CHECKPOINT.md")
+    ckt = open(ck, encoding="utf-8").read() if os.path.exists(ck) else "_no CHECKPOINT.md_"
+    s = f"# HANDOFF: {L['project']} → {to}\n\n_Generated {now()} by coord.py handoff. Read in full before acting._\n\n"
+    s += "## 1. Receiving instructions\n1. Load the coordination-manager skill and read this file, `ledger.json`, `BOARD.md` and the deliverables listed in §7, **in full**.\n2. Run `coord.py lint` and `coord.py next`.\n3. Answer the resume fingerprint (§6) **from the files** and report every mismatch.\n4. Send the Operator a **Handoff ACK**: what you now hold, what you could not verify, and the next action. Wait for confirmation (Gate 1).\n5. Continue at the next action. Do not restart Phase 1. The sending session is now read-only.\n\n"
+    s += "## 2. Next actions\n" + "\n".join(f"- {x}" for x in nxt) + "\n\n"
+    s += "## 3. Relays in flight\n" + table(inflight, ["Relay", "Target", "Purpose", "Awaited outputs"]) + "\n## 4. Returns awaiting review\n" + table(review, ["Relay", "From", "Purpose"]) + "\n"
+    s += "## 5. Open decisions, conflicts and risks\n**Decisions**\n\n" + table([(k, v["question"], v["recommendation"], v["needed_by"]) for k, v in L["decisions"].items() if v["status"] == "open"], ["ID", "Question", "Recommendation", "Needed by"])
+    s += "\n**Conflicts**\n\n" + table([(k, v["subject"], v["recommendation"]) for k, v in L["conflicts"].items() if v["status"] == "open"], ["Conflict", "Subject", "Recommendation"])
+    s += "\n**Risks**\n\n" + table([(k, v["description"], v["mitigation"]) for k, v in L["risks"].items() if v["status"] == "open"], ["Risk", "Description", "Mitigation"]) + "\n"
+    s += "## 6. Checkpoint and resume fingerprint (from CHECKPOINT.md)\n\n" + ckt + "\n\n"
+    s += "## 7. Deliverables (latest versions; attach them)\n" + table([(k, v["file"], v["version"], v["status"]) for k, v in L["deliverables"].items()], ["ID", "File", "Ver", "Status"]) + "\n"
+    s += "## 8. Decided (verbatim rulings)\n" + table([(k, v["question"], v.get("ruling", "")) for k, v in L["decisions"].items() if v["status"] == "decided"], ["ID", "Question", "Ruling (verbatim)"]) + "\n"
+    s += "## 9. Not in the ledger (sending CM fills in)\n- Reasoning behind open recommendations:\n- Operator preferences (format, effort, cadence, surfaces):\n- Pitfalls learned:\n- Not transferred (and why):\n\n"
+    s += "## 10. Board snapshot\nSee `BOARD.md` (regenerated with this packet).\n"
+    out = os.path.join(d, f"HANDOFF-{date}.md")
+    with open(out, "w", encoding="utf-8") as f: f.write(s)
+    log(d, L, f"handoff packet written for {to}: {os.path.basename(out)}"); save(d, L)
+    print(f"wrote {out}")
+
 def main():
     d, argv = parse_args(sys.argv[1:])
     if not argv or argv[0] in ("-h", "--help", "help"): print(__doc__); return
     c, a = argv[0], argv[1:]
     cmds = {"init": cmd_init, "show": cmd_show, "log": cmd_log, "board": cmd_board,
-            "lint": cmd_lint, "glossary": cmd_glossary, "next": cmd_next,
+            "lint": cmd_lint, "glossary": cmd_glossary, "next": cmd_next, "handoff": cmd_handoff,
             "add": lambda d, a: cmd_add_set(d, a, "add"), "set": lambda d, a: cmd_add_set(d, a, "set")}
     if c not in cmds: die(f"unknown command {c!r} (see --help)")
     cmds[c](d, a)
